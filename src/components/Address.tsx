@@ -1,13 +1,26 @@
-import React, {FunctionComponent, useState} from "react";
+import React, {FunctionComponent} from "react";
 
+import {
+    useParams,
+    Redirect
+} from "react-router-dom";
 
+import addresses from "../data/addresses";
 
 const Address: FunctionComponent = () => {
-    const [count, setCount] = useState(0);
+
+    const { id } = useParams();
+
+    const address =  addresses.find((address) => address.id === Number(id))
+
+    if (!address) {
+        return <Redirect to="/404" />
+    }
+
     return (
-        <ul>
-            <li>Item 1</li>
-        </ul>
+        <div className="border border-blue-100 rounded mt-8 p-4 overflow-x-auto">
+            Hello <strong>{address.address}</strong>
+        </div>
     );
 };
 export default Address;
