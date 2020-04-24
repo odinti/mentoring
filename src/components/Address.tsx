@@ -23,4 +23,7 @@ const Address: FunctionComponent = () => {
         </div>
     );
 };
+
+Address.whyDidYouRender = true
+
 export default Address;

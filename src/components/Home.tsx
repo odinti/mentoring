@@ -1,13 +1,14 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 
 import Search from "./Search"
-import Results from "./Results"
-import { fetchResults } from "../helpers/fetchResults";
+import Result from "./Result"
+import {fetchResults} from "../helpers/fetchResults";
+import {defaultEmpty} from "../helpers/defaultEmpty";
 
 const Home: FunctionComponent = () => {
     const [search, setSearch] = useState("");
 
-    const [results, setResults] = useState([]);
+    const [results, setResults] = useState(defaultEmpty);
 
     const [loading, setLoading] = useState(false);
 
@@ -21,7 +22,11 @@ const Home: FunctionComponent = () => {
             const handler = setTimeout(async () => {
                 try {
                     const {status, data} = await fetchResults(search)
-                    setResults(data)
+
+                    if (results.map(r => r.id).join('-') !== data.map(r => r.id).join('-')) {
+                        setResults(data)
+                    }
+
                     setStatus(status)
                 } catch (e) {
                     console.error(e)
@@ -41,16 +46,36 @@ const Home: FunctionComponent = () => {
             <div className={"shadow relative"}>
                 <Search setSearch={setSearch} search={search}/>
                 <div className="absolute shadow w-full  bg-white">
-                    { search ? <Results results={results} loading={loading}/> : null }
-                    { search ? (
-                        <div className="border-t border-gray-100 shadow-sm rounded p-4 ml-auto text-center text-sm text-gray-500">
-                            Status: { status }
+                    {
+                        search && (
+                            results.length ? (
+                                <ul className="border-t border-gray-100 rounded-b">
+                                    {results.map((result, key) => <Result address={result.address} id={result.id}
+                                                                          key={result.id}
+                                                                          search={search}
+                                                                          last={(key + 1) === results.length}/>)}
+                                </ul>
+
+                            ) : (
+                                <div className="border-t border-gray-100 rounded-b p-4 text-center text-gray-500">
+                                    Nothing found :(
+                                </div>
+                            )
+                        )
+                    }
+                    {search ? (
+                        <div
+                            className="border-t border-gray-100 shadow-sm rounded p-4 ml-auto text-center text-sm text-gray-500">
+                            Status: {  loading ? "Loading" :  status }
                         </div>
-                    ) : null }
+                    ) : null}
                 </div>
             </div>
         </>
     );
 
 };
+
+Home.whyDidYouRender = true
+
 export default Home;

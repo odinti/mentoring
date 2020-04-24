@@ -1,6 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+if (process.env.NODE_ENV === 'development') {
+    const whyDidYouRender = require('@welldone-software/why-did-you-render');
+    whyDidYouRender(React, {
+        trackAllPureComponents: true,
+    });
+}
+
 import {
     BrowserRouter as Router,
     Switch,
@@ -8,8 +15,14 @@ import {
     Link
 } from "react-router-dom";
 
-import Address from './components/Address';
-import Home from './components/Home'
+const Spinner = React.memo(() =>  (
+    <div className={"tw-w-full tw-h-full tw-bg-blue-500"}>
+        Loading
+    </div>
+))
+
+const Home = React.lazy(() => import('./components/Home'))
+const Address = React.lazy(() =>  import('./components/Address'))
 
 ReactDOM.render(
     <Router>
@@ -43,7 +56,9 @@ ReactDOM.render(
             </ul>
             <Switch>
                 <Route path="/address/:id">
-                    <Address/>
+                    <React.Suspense fallback={<Spinner/>}>
+                        <Address/>
+                    </React.Suspense>
                 </Route>
                 <Route path="/404">
                     <div  className="text-center">
@@ -52,7 +67,9 @@ ReactDOM.render(
                     </div>
                 </Route>
                 <Route path="/">
-                    <Home/>
+                    <React.Suspense fallback={<Spinner/>}>
+                        <Home/>
+                    </React.Suspense>
                 </Route>
             </Switch>
         </div>

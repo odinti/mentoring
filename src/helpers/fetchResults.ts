@@ -1,19 +1,25 @@
 import addresses from "../data/addresses";
 import Address from "../types/Address";
+import {defaultEmpty} from "./defaultEmpty";
 
 const cache = {
+    _local: {},
     save(key: string, value: Array<Address>) {
         window.localStorage.setItem(key, JSON.stringify(value))
+        this._local[key] = value;
     },
     restore(key: string) {
-        return JSON.parse(window.localStorage.getItem(key));
+        if (key in  this._local) {
+            return this._local[key]
+        } else {
+            return JSON.parse(window.localStorage.getItem(key));
+        }
     }
 }
 
 const callAPI = async (query: string) => {
     return new Promise<Array<Address>>((resolve, reject) => {
         setTimeout(() => {
-
             const found = addresses.filter(({address}) => {
                 return address.toLowerCase().indexOf(query.toLowerCase()) !== -1
             })
@@ -32,7 +38,7 @@ type Response = {
 
     if (query === "") {
         return {
-            data: [],
+            data: defaultEmpty,
             status: "Empty"
         };
     }
@@ -52,7 +58,7 @@ type Response = {
 
     const data = await callAPI(query)
 
-    if (!data.length) return { status: "API Hit, Not Saved", data: [] };
+    if (!data.length) return { status: "API Hit, Not Saved", data: defaultEmpty };
 
     cache.save(query, data);
 
